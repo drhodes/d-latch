@@ -52,7 +52,7 @@ dlat.BoundingBox.prototype = {
     
     
     Print: function() {
-        console.log(this);
+        log(this); // hrm.
     }
 };
 

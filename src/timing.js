@@ -2,10 +2,29 @@
 
 // the timing diagram module
 dlat.timing = function() {
-    var snap = dlat.common.snap;    
+    var snap = dlat.common.snap; 
     var mod = {}; // the module
+    
     const WAVEFORM_HEIGHT = 100;
-    const DEFAULT_NUM_PIXELS_PER_NS = 100;
+
+    // this s
+    const DEFAULT_NUM_PIXELS_PER_NS = 100; 
+
+    // TriggerLine Class
+    {
+        // ------------------------------------------------------------------
+        // This is the bar on top of the wave form that lets users 
+        mod.TriggerLine = function(boundingBox) {
+            
+        };
+        
+        mod.TriggerLine.prototype = {
+            Foo: function() {
+            }
+        };
+
+    }
+
     
     // SegmentUI Class
     {
@@ -13,7 +32,7 @@ dlat.timing = function() {
         // A segment is a piece of the waveform that is associated with a
         // time delta and two volt-time points
         mod.SegmentUI = function() {
-            this.line = snap.line(0,0, 10,0); // arbitrary poisition
+            this.line = snap.line(0,0, 10,0); // arbitrary position
             this.line.attr({
                 stroke: '#333',
                 strokeWidth: '1px'
@@ -36,7 +55,8 @@ dlat.timing = function() {
         // location of the single plot, one row in the larger diagram.
         // This plot represents the voltage found on one wire of a
         // circuit.
-        
+
+        // Waveform constructor
         mod.Waveform = function(name, data, bb) {
             this.name = name;
             this.curSignal = 0; // value from [0 -> 1]
@@ -44,15 +64,22 @@ dlat.timing = function() {
             var parser = new mod.WaveformParser(data);
             this.voltPoints = parser.GetVoltPoints();
             this.bb = bb;
-            
-            var padding = 3;
+
+            var padding = 3; // visual space
             var roomForName = 60; // make room for the name
+
             
             this.innerBox = bb.
                 Shrink(padding).
                 MoveRight(roomForName).
                 ReduceWidth(roomForName);
            
+            // a trigger line lives at the top of the wave form.  It
+            // occupies the entire width of the inner box and some
+            // small height of it.
+            // this.triggerLine = new dlat.TriggerLine(bb);
+
+            
             this.background = new dlat.BackgroundBox(bb, "#EEE");
             this.innerBackground = new dlat.BackgroundBox(this.innerBox, "#DDD");
 
@@ -64,11 +91,13 @@ dlat.timing = function() {
                 font: fontSize + "px source-sans-pro, Source Sans Pro",
                 textAnchor: "center"
             });
+
+            
         };
         
         mod.Waveform.prototype = {
             Update: function(t) {
-                log("updating waveform: " + this.name + ", time: " + t);
+                //log("updating waveform: " + this.name + ", time: " + t);
             },
             
             ShiftLeft: function() {
@@ -186,14 +215,11 @@ dlat.timing = function() {
                 for (var i in segs) {
                     var seg = segs[i];
                     handleSeg(seg);
-                    log(seg);
                 }
-                log(voltPoints);
             },
 
-
             GetVoltPoints: function() {
-                return self.voltPoints;
+                return this.voltPoints;
             }
         };
     }
@@ -201,7 +227,7 @@ dlat.timing = function() {
     // Diagram Class
     {
         // ------------------------------------------------------------------
-        // Manage the waveforms, will need a time line and a sweep bar.  Also
+        // Manage the waveforms, will need a time line and a scrubber.  Also
         // need a master wall clock and zoom buttons.
         //
         mod.Diagram = function(boundingBox) {
@@ -236,11 +262,11 @@ dlat.timing = function() {
                 
                 if (this.RoomForWaveform(waveform)) { 
                     this.waveforms.push(waveform);
-                    log(waveform);
                 } else {
                     throw "AddWaveform can't add: " + name +
                         ", not enough pixels. " +
                         "The Diagram object needs a bigger BoundingBox to start with.";
+                    // can't justify building a layout framework for this yet. :)
                 }
             },
             

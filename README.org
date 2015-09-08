@@ -1,5 +1,3 @@
-
-
 * Demo: d-latch for 6.004x
 ** What is it?
 - This demonstrates how the d-latch works.

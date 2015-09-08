@@ -9,7 +9,6 @@ dlat.BackgroundBox = function(bb, color) {
         fill: color,
         strokeWidth: '2px'
     });
-    log(this.rect);
 };
 
 dlat.BackgroundBox.prototype = {

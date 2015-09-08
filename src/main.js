@@ -19,6 +19,10 @@ function main() {
     diag.AddWaveform("Clock", "10H:2X:10L");
     diag.AddWaveform("G", "10H:2X:10L");
     diag.AddWaveform("C", "10H:2X:10L");
+
+    
+
+    
     diag.Update(1);
 }
 

@@ -6,11 +6,21 @@ function isUndefined(ref) {
 
 function log(x) { console.log(x); }
 
-
-function api(o) {
-    log(o.prototype);
-}
-
 function contains(seq, item) {
     return seq.indexOf(item) != -1;
+}
+
+function replicate(n, val) {
+    var xs = [];
+    for (var i=0; i<n; i++) {
+        xs.push(val);
+    }
+    return xs;
+}
+function replicateString(n, val) {
+    var xs = "";
+    for (var i=0; i<n; i++) {
+        xs = xs + val;
+    }
+    return xs;
 }

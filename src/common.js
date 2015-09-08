@@ -1,6 +1,9 @@
 
 // global namespace for d-latch
-var dlat = {};
+var dlat = {TESTING: true};
+
+
+
 
 // common types and goodies found throughout the project.
 dlat.common = function() {
