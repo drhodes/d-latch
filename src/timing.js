@@ -6,23 +6,69 @@ dlat.timing = function() {
     var mod = {}; // the module
     
     const WAVEFORM_HEIGHT = 100;
-
+    const TRIGGERLINE_HEIGHT = 15;
+    const TRIGGERLINE_BGCOLOR = "#AAA";
+    const TRIGGERBOX_BGCOLOR = "#999";
     // this s
     const DEFAULT_NUM_PIXELS_PER_NS = 100; 
+    const NUM_TRIGGER_BOXES = 100;
+    // TriggerBox Class
+    {
+        // ------------------------------------------------------------------
+        // A trigger box defines a point on the trigger line, which is
+        // a specific time in nano seconds offset from zero.
+        
+        // constructor
+        mod.TriggerBox = function(boundingBox) {
+            this.boundingBox = boundingBox;
+            this.backgroundBox = new dlat.HollowBox( boundingBox,
+                                                     TRIGGERBOX_BGCOLOR);
+        };
+        
+        mod.TriggerBox.prototype = {
+            
+        };
+    }
 
+    
     // TriggerLine Class
     {
         // ------------------------------------------------------------------
-        // This is the bar on top of the wave form that lets users 
+        // This is the bar on top of the wave form that lets users
+        // sequence a toggle on a particular input.
+        // constructor
         mod.TriggerLine = function(boundingBox) {
-            
+            this.height = TRIGGERLINE_HEIGHT;
+            this.boundingBox = boundingBox.SetHeight(TRIGGERLINE_HEIGHT);
+            this.backgroundBox = new dlat.BackgroundBox( this.boundingBox,
+                                                         TRIGGERLINE_BGCOLOR);
+            this.triggerBoxes = [];
+            this.SetupTriggerBoxes();
         };
         
         mod.TriggerLine.prototype = {
-            Foo: function() {
+            SetupTriggerBoxes: function() {
+                // split the bounding box into a number of bounding boxes,
+                var widthPerBox = this.boundingBox.Width() / NUM_TRIGGER_BOXES;
+                var templateBox = this.boundingBox.SetWidth(widthPerBox);
+                
+                for (var i=0; i<NUM_TRIGGER_BOXES; i++) {
+                    var dx = i * widthPerBox;
+                    var bb = templateBox.MoveRight(dx);
+                    var tb = new mod.TriggerBox(bb);                    
+                    this.triggerBoxes.push(tb);
+                }
+            },
+
+            
+            Height: function() {
+                this.boundingBox.Height();
+            },
+            
+            BoundingBox: function() {
+                return this.boundingBox.Clone();
             }
         };
-
     }
 
     
@@ -69,16 +115,15 @@ dlat.timing = function() {
             var roomForName = 60; // make room for the name
 
             
-            this.innerBox = bb.
-                Shrink(padding).
-                MoveRight(roomForName).
-                ReduceWidth(roomForName);
-           
-            // a trigger line lives at the top of the wave form.  It
-            // occupies the entire width of the inner box and some
-            // small height of it.
-            // this.triggerLine = new dlat.TriggerLine(bb);
+            var innerBox = bb.
+                    Shrink(padding).
+                    MoveRight(roomForName).
+                    ReduceWidth(roomForName);
 
+            // move the innerBox down to make room for the trigger line.
+            this.innerBox = innerBox.
+                MoveDown(TRIGGERLINE_HEIGHT).
+                SetHeight(innerBox.Height() - TRIGGERLINE_HEIGHT);
             
             this.background = new dlat.BackgroundBox(bb, "#EEE");
             this.innerBackground = new dlat.BackgroundBox(this.innerBox, "#DDD");
@@ -92,6 +137,10 @@ dlat.timing = function() {
                 textAnchor: "center"
             });
 
+            // a trigger line lives at the top of the wave form.  It
+            // occupies the entire width of the inner box and some
+            // small height of it.
+            this.triggerLine = new mod.TriggerLine(innerBox);
             
         };
         

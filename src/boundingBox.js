@@ -49,6 +49,11 @@ dlat.BoundingBox.prototype = {
         bb.height = h;
         return bb;
     },
+    SetWidth: function(w) {
+        var bb = this.Clone();
+        bb.width = w;
+        return bb;
+    },
     
     
     Print: function() {
