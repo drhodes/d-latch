@@ -1,15 +1,20 @@
-// -*- js2 -*-
-
 // Module for the timing diagram
+
 dlat.timing = function() {
-    var snap = dlat.common.snap; 
-    var mod = {}; // the module
+    // the module
+    var mod = {}; 
+    
+    // imports
+    var snap = dlat.common.snap;
+    var box = dlat.box;
+    
     
     const WAVEFORM_HEIGHT = 100;
     const TRIGGERLINE_HEIGHT = 15;
     const TRIGGERLINE_BGCOLOR = "#AAA";
     const TRIGGERBOX_BGCOLOR = "#999";
-    // this s
+
+    // the following constant should depend on the environment 
     const DEFAULT_NUM_PIXELS_PER_NS = 100; 
     const NUM_TRIGGER_BOXES = 100;
     
@@ -22,7 +27,7 @@ dlat.timing = function() {
         // constructor
         mod.TriggerBox = function(boundingBox) {
             this.boundingBox = boundingBox;
-            this.hollowBox = new dlat.HollowBox( boundingBox,
+            this.hollowBox = new box.HollowBox( boundingBox,
                                                  TRIGGERBOX_BGCOLOR);
         };
         
@@ -39,7 +44,7 @@ dlat.timing = function() {
         mod.TriggerLine = function(boundingBox) {
             this.height = TRIGGERLINE_HEIGHT;
             this.boundingBox = boundingBox.SetHeight(TRIGGERLINE_HEIGHT);
-            this.backgroundBox = new dlat.BackgroundBox( this.boundingBox,
+            this.backgroundBox = new box.BackgroundBox( this.boundingBox,
                                                          TRIGGERLINE_BGCOLOR);
             this.triggerBoxes = [];
             this.SetupTriggerBoxes();
@@ -121,8 +126,8 @@ dlat.timing = function() {
                 MoveDown(TRIGGERLINE_HEIGHT).
                 SetHeight(innerBox.Height() - TRIGGERLINE_HEIGHT);
             
-            this.background = new dlat.BackgroundBox(bb, "#EEE");
-            this.innerBackground = new dlat.BackgroundBox(this.innerBox, "#DDD");
+            this.background = new box.BackgroundBox(bb, "#EEE");
+            this.innerBackground = new box.BackgroundBox(this.innerBox, "#DDD");
 
             var fontSize = 20;
             var textX = bb.Left() + padding;
