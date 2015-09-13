@@ -7,4 +7,7 @@ add: clean
 	git add -A :/
 commit:
 	git commit -a
+
+push:
+	./push.sh
 FORCE:
