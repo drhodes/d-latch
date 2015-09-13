@@ -1,6 +1,6 @@
 // -*- js2 -*-
 
-// the timing diagram module
+// Module for the timing diagram
 dlat.timing = function() {
     var snap = dlat.common.snap; 
     var mod = {}; // the module
@@ -12,6 +12,7 @@ dlat.timing = function() {
     // this s
     const DEFAULT_NUM_PIXELS_PER_NS = 100; 
     const NUM_TRIGGER_BOXES = 100;
+    
     // TriggerBox Class
     {
         // ------------------------------------------------------------------
@@ -21,15 +22,13 @@ dlat.timing = function() {
         // constructor
         mod.TriggerBox = function(boundingBox) {
             this.boundingBox = boundingBox;
-            this.backgroundBox = new dlat.HollowBox( boundingBox,
-                                                     TRIGGERBOX_BGCOLOR);
+            this.hollowBox = new dlat.HollowBox( boundingBox,
+                                                 TRIGGERBOX_BGCOLOR);
         };
         
         mod.TriggerBox.prototype = {
-            
         };
     }
-
     
     // TriggerLine Class
     {
@@ -59,7 +58,6 @@ dlat.timing = function() {
                     this.triggerBoxes.push(tb);
                 }
             },
-
             
             Height: function() {
                 this.boundingBox.Height();
@@ -70,7 +68,6 @@ dlat.timing = function() {
             }
         };
     }
-
     
     // SegmentUI Class
     {
@@ -91,7 +88,6 @@ dlat.timing = function() {
                 this.line.transform(m);
             }
         };
-        
     }
 
     // Waveform Class
@@ -176,7 +172,8 @@ dlat.timing = function() {
         mod.WaveformParser = function(data) {
             this.voltPoints = this.parseData(data);
             
-        };        
+        };
+        
         mod.WaveformParser.prototype = {
             // -------------------------------------------------------
             validSegType: function(c) {
@@ -207,10 +204,11 @@ dlat.timing = function() {
                 return this.renderSegments(lex);
             },
             
-            // <3p
+            // 
             renderSegments: function(segs) {
                 // a list of voltages, each a nanosecond wide, as convention.
                 var voltPoints = [];
+
                 var lastVoltPoint = function() {
                     if (voltPoints.length == 0) {
                         return 0;
