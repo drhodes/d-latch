@@ -5,16 +5,7 @@
 ** deps
 - SnapSVG
 
-** Load Order of javascript.
-- eventually the sources will be combined and minified, but until
-  then.
-- snap.js
-- common.js 
-- boundingBox.js
-  
 ** features
-- orthodox javascript
 - schematic
-- animated timing diagram w/ event highlighting.
-- user can toggle D, but if it isn't done at the right time, the latch
-  breaks!
+- interactive timing diagram 
+ 
