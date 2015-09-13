@@ -2,7 +2,7 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1. Demo: d-latch for 6.004x</a>
+<li><a href="#sec-1">1. D-latch demo</a>
 <ul>
 <li><a href="#sec-1-1">1.1. What is it?</a></li>
 <li><a href="#sec-1-2">1.2. deps</a></li>
@@ -13,7 +13,7 @@
 </div>
 </div>
 
-# Demo: d-latch for 6.004x<a id="sec-1" name="sec-1"></a>
+# D-latch demo<a id="sec-1" name="sec-1"></a>
 
 ## What is it?<a id="sec-1-1" name="sec-1-1"></a>
 
