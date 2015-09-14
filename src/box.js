@@ -4,7 +4,7 @@ dlat.box = function() {
 
     // imports
     var snap = dlat.common.snap;
-    
+
     // -----------------------------------------------------------------------------
     // BoundingBox is for layout positioning and sizing.
     // screen coords, top, left is 0,0
@@ -66,17 +66,28 @@ dlat.box = function() {
     };
 
     // HollowBox class.
-    mod.HollowBox = function(bb, color) {
+    mod.HollowBox = function(bb, fill, stroke) {
         this.boundingBox = bb;
         this.rect = snap.rect(bb.Left(), bb.Top(), bb.Width(), bb.Height());
         this.rect.attr({
             strokeWidth: '.5px',
-            fill: "#EEE",
-            stroke: "#AAA"
+            fill: fill,
+            stroke: stroke
         });
     };
-
+    
     mod.HollowBox.prototype = {
+        AddEvent: function(event, f) {
+            this.rect[event](f);
+        },
+
+        Foo: function() {
+            log("Foo was called on HollowBox");
+        },
+
+        Attr: function(attr) {
+            this.rect.attr(attr);
+        }
     };
 
 

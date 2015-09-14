@@ -8,30 +8,112 @@ dlat.timing = function() {
     var snap = dlat.common.snap;
     var box = dlat.box;
     
-    
     const WAVEFORM_HEIGHT = 100;
-    const TRIGGERLINE_HEIGHT = 15;
+    const TRIGGERLINE_HEIGHT = 10;
     const TRIGGERLINE_BGCOLOR = "#AAA";
     const TRIGGERBOX_BGCOLOR = "#999";
 
-    // the following constant should depend on the environment 
-    const DEFAULT_NUM_PIXELS_PER_NS = 100; 
-    const NUM_TRIGGER_BOXES = 100;
+    const NUM_TRIGGER_BOXES = 160;    
+    const NS_PER_TRIGGER_BOX = 10;
     
     // TriggerBox Class
     {
         // ------------------------------------------------------------------
         // A trigger box defines a point on the trigger line, which is
-        // a specific time in nano seconds offset from zero.
+        // a specific time in nano seconds offset from zero.  If the
+        // trigger box is checked then the input is toggled
         
         // constructor
         mod.TriggerBox = function(boundingBox) {
+            this.activated = false;
             this.boundingBox = boundingBox;
             this.hollowBox = new box.HollowBox( boundingBox,
-                                                 TRIGGERBOX_BGCOLOR);
+                                                TRIGGERBOX_BGCOLOR,
+                                                TRIGGERBOX_BGCOLOR);
+            this.indicator = nil;
+            
+            this.setupIndicator();
+            this.setupEventCallbacks();
         };
         
         mod.TriggerBox.prototype = {
+            setupIndicator: function() {
+                var bb = this.boundingBox;
+                var t = bb.Top();
+                var b = bb.Bottom();
+                var l = bb.Left();
+                var r = bb.Right();
+                var m = (l+r)/2;
+
+                this.indicator = snap.polyline(l, t,
+                                               r, t,
+                                               m, b,
+                                               l, t);
+                this.indicator.attr({
+                    fill: TRIGGERBOX_BGCOLOR,
+                    stroke: TRIGGERBOX_BGCOLOR,
+                    strokeWidth: '.5px'
+                });
+                
+                var self=this;
+                this.indicator.mousedown(function() {
+                    self.ToggleIndicator();
+                });
+            },
+
+            // It may be necessary to lock out a range of trigger
+            // boxes, this method locks one.
+            Lock: function() {
+                // remove the callbacks from this trigger box.
+                // change the colors.
+            },
+            
+            ToggleIndicator: function() {
+                var onColor = "#1F1";
+                var offColor = TRIGGERBOX_BGCOLOR;
+                this.activated = !this.activated;
+                
+                if (this.activated) {                    
+                    this.indicator.attr({ fill: onColor });
+                } else {
+                    this.indicator.attr({ fill: offColor });
+                }
+            },
+            
+            // +m
+            setupEventCallbacks: function() {
+                var self = this;
+                this.hollowBox.AddEvent( 'mousedown', function() {
+                    self.ToggleIndicator();
+                });
+                this.hollowBox.AddEvent( 'mousemove', function() {
+                    self.GlowIndicator(true);
+                });
+                this.hollowBox.AddEvent( 'mouseout', function() {
+                    self.GlowIndicator(false);
+                });
+                this.indicator.mousemove(function() {
+                    self.GlowIndicator(true);
+                });
+                this.indicator.mouseout(function() {
+                    self.GlowIndicator(false);
+                });
+            },
+
+            
+            GlowIndicator: function(shouldGlow) {
+                var glowColor = "#FFF";
+                var noGlowColor = box.TRIGGERBOX_BGCOLOR;
+                if (shouldGlow) {
+                    this.indicator.attr({ stroke: glowColor,
+                                          strokeWidth: 1
+                                        });
+                } else {
+                    this.indicator.attr({ stroke: noGlowColor,
+                                          strokeWidth: .5
+                                        });
+                }
+            }
         };
     }
     
@@ -48,6 +130,7 @@ dlat.timing = function() {
                                                          TRIGGERLINE_BGCOLOR);
             this.triggerBoxes = [];
             this.SetupTriggerBoxes();
+
         };
         
         mod.TriggerLine.prototype = {
@@ -142,7 +225,9 @@ dlat.timing = function() {
             // occupies the entire width of the inner box and some
             // small height of it.
             this.triggerLine = new mod.TriggerLine(innerBox);
-            
+
+            // experiment
+            // var c = snap.image("gifs/indicator.gif", 400, 400, 288, 224);
         };
         
         mod.Waveform.prototype = {

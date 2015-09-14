@@ -15,9 +15,10 @@ function main() {
     seg.MoveTo(10, 10);
     seg.MoveTo(100, 10);
 
-    diag.AddWaveform("Clock", "10H:2X:10L");
+    diag.AddWaveform("Q'", "10H:2X:10L");
+    diag.AddWaveform("Q", "10H:2X:10L");
     diag.AddWaveform("G", "10H:2X:10L");
-    diag.AddWaveform("C", "10H:2X:10L");
+    diag.AddWaveform("D", "10H:2X:10L");
     
     diag.Update(1);
 }
