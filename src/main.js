@@ -19,17 +19,17 @@ function main() {
     diag.AddWaveform("Q", "10H:2X:10L");
     diag.AddWaveform("G", "10H:2X:10L");
     diag.AddWaveform("D", "10H:2X:10L");
-    
-    diag.Update(1);
 
-    // :/ this doesn't seem like the way to do this.
-    function updateFrame() {
-        setTimeout( function() {
-            diag.Update();
-            updateFrame();
-        }, 1000/10);
-    }
-    updateFrame();   
+    
+    // GLOBAL UPDATE FUNCTION.  this is kind of nasty, But it's the
+    // only global nastiness and replaces the need for a big loop.
+    // This function is visible to all code, it updates the entire UI
+    // once.
+
+    // Update functions must not contain a call to this function.
+    dlat.GLOBAL_UPDATE = function() {
+        diag.Update();
+    };
 }
 
 main();

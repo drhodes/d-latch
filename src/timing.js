@@ -12,11 +12,11 @@ dlat.timing = function() {
     const TRIGGERLINE_HEIGHT = 10;
     const TRIGGERLINE_BGCOLOR = "#AAA";
     const TRIGGERBOX_BGCOLOR = "#999";
-
-    const NUM_TRIGGER_BOXES = 100;    
+    
+    const NUM_TIME_STEPS = 100;    
     const NS_PER_TRIGGER_BOX = 10;
     
-    // TriggerBox Class
+    // class TriggerBox
     {
         // ------------------------------------------------------------------
         // A trigger box defines a point on the trigger line, which is
@@ -31,11 +31,9 @@ dlat.timing = function() {
                                                 TRIGGERBOX_BGCOLOR,
                                                 TRIGGERBOX_BGCOLOR);
             this.indicator = nil;
-            
             this.setupIndicator();
             this.setupEventCallbacks();
         };
-        
         mod.TriggerBox.prototype = {
             setupIndicator: function() {
                 var bb = this.boundingBox;
@@ -123,7 +121,7 @@ dlat.timing = function() {
         };
     }
     
-    // TriggerLineClear Class
+    // class TriggerLineClear
     {
         // ------------------------------------------------------------------
         // Clear out the trigger line
@@ -168,6 +166,7 @@ dlat.timing = function() {
                 this.hollowBox.AddEvent( 'mousedown', function() {
                     self.clearFlag = true;
                     self.hollowBox.Attr({fill:onColor});
+                    dlat.GLOBAL_UPDATE();
                 });
                 this.hollowBox.AddEvent( 'mouseup', function() {
                     self.hollowBox.Attr({fill:offColor});
@@ -190,7 +189,7 @@ dlat.timing = function() {
 
     }
 
-    // TriggerLine Class
+    // class TriggerLine
     {
         // ------------------------------------------------------------------
         // This is the bar on top of the wave form that lets users
@@ -208,10 +207,10 @@ dlat.timing = function() {
         mod.TriggerLine.prototype = {
             SetupTriggerBoxes: function() {
                 // split the bounding box into a number of bounding boxes,
-                var widthPerBox = this.boundingBox.Width() / NUM_TRIGGER_BOXES;
+                var widthPerBox = this.boundingBox.Width() / NUM_TIME_STEPS;
                 var templateBox = this.boundingBox.SetWidth(widthPerBox);
                 
-                for (var i=0; i<NUM_TRIGGER_BOXES; i++) {
+                for (var i=0; i<NUM_TIME_STEPS; i++) {
                     var dx = i * widthPerBox;
                     var bb = templateBox.MoveRight(dx);
                     var tb = new mod.TriggerBox(bb);                    
@@ -220,7 +219,7 @@ dlat.timing = function() {
             },
 
             Clear: function() {
-                for (var i=0; i<NUM_TRIGGER_BOXES; i++) {
+                for (var i=0; i<NUM_TIME_STEPS; i++) {
                     this.triggerBoxes[i].Clear();
                 }
             },
@@ -235,7 +234,7 @@ dlat.timing = function() {
         };
     }
     
-    // SegmentUI Class
+    // class SegmentUI
     {
         // ------------------------------------------------------------------
         // A segment is a piece of the waveform that is associated with a
@@ -256,7 +255,27 @@ dlat.timing = function() {
         };
     }
 
-    // Waveform Class
+    // class WavePlot
+    {
+        // constructor
+        mod.WavePlot = function(boundingBox) {
+            const padding = 3;
+            const nudge = 1;
+            this.boundingBox = boundingBox
+                .MoveDown(padding)
+                .SetHeight(boundingBox.Height() - 2*padding)
+                .Shrink(nudge);
+            this.bgBox = new box.BackgroundBox(this.boundingBox, "#FFF");
+            this.bgBox.Attr({ strokeWidth: "0px"});
+        };
+        
+        // methods
+        mod.WavePlot.prototype = {
+        };
+    }
+
+    
+    // class Waveform
     {
         // ------------------------------------------------------------------
         // Waveform takes a boundingBox that defines the dimensions and
@@ -289,6 +308,8 @@ dlat.timing = function() {
             this.background = new box.BackgroundBox(bb, "#EEE");
             this.innerBackground = new box.BackgroundBox(this.innerBox, "#DDD");
 
+            this.wavePlot = new mod.WavePlot(this.innerBox);
+            
             var fontSize = 20;
             var textX = bb.Left() + padding;
             var textY = bb.Top() + bb.Height()/2 + fontSize/4;

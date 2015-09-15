@@ -111,6 +111,9 @@ dlat.box = function() {
 
 
     mod.BackgroundBox.prototype = {
+        Attr: function(attr) {
+            this.rect.attr(attr);
+        }
     };
 
     return mod;
