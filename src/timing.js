@@ -8,12 +8,12 @@ dlat.timing = function() {
     var snap = dlat.common.snap;
     var box = dlat.box;
     
-    const WAVEFORM_HEIGHT = 100;
+    const WAVEFORM_HEIGHT = 80;
     const TRIGGERLINE_HEIGHT = 10;
     const TRIGGERLINE_BGCOLOR = "#AAA";
     const TRIGGERBOX_BGCOLOR = "#999";
 
-    const NUM_TRIGGER_BOXES = 160;    
+    const NUM_TRIGGER_BOXES = 100;    
     const NS_PER_TRIGGER_BOX = 10;
     
     // TriggerBox Class
@@ -67,6 +67,12 @@ dlat.timing = function() {
                 // remove the callbacks from this trigger box.
                 // change the colors.
             },
+
+            Clear: function() {
+                if (this.activated) {
+                    this.ToggleIndicator();
+                }
+            },
             
             ToggleIndicator: function() {
                 var onColor = "#1F1";
@@ -117,6 +123,73 @@ dlat.timing = function() {
         };
     }
     
+    // TriggerLineClear Class
+    {
+        // ------------------------------------------------------------------
+        // Clear out the trigger line
+        
+        // constructor
+        mod.TriggerLineClear = function(boundingBox) {
+            this.clearFlag = false;
+            var spacer = 3;
+            this.boundingBox = boundingBox
+                .MoveLeft(TRIGGERLINE_HEIGHT + spacer - 1)
+                .SetHeight(TRIGGERLINE_HEIGHT - 2)
+                .SetWidth(TRIGGERLINE_HEIGHT - 2 )
+                .MoveDown(1);
+            
+            var bb = this.boundingBox;    
+            // make an x in the box.
+            // draw a line from top left to bottom right
+            this.line1 = snap.line(bb.Left(), bb.Top(), bb.Right(), bb.Bottom());
+            this.line1.attr({
+                stroke: "#000",
+                strokeWidth: ".5px"
+            });
+            this.line2 = snap.line(bb.Right(), bb.Top(), bb.Left(), bb.Bottom());
+            this.line2.attr({
+                stroke: "#000",
+                strokeWidth: ".5px"
+            });
+
+            this.hollowBox = new box.HollowBox( bb,
+                                                TRIGGERBOX_BGCOLOR,
+                                                TRIGGERBOX_BGCOLOR);
+            this.hollowBox.Attr({opacity: 0.3});
+            this.setupEventCallbacks();
+        };
+        
+        mod.TriggerLineClear.prototype = {
+            setupEventCallbacks: function() {
+                var onColor = "#F11";
+                var offColor = TRIGGERBOX_BGCOLOR;
+                var self = this;
+                // box events.
+                this.hollowBox.AddEvent( 'mousedown', function() {
+                    self.clearFlag = true;
+                    self.hollowBox.Attr({fill:onColor});
+                });
+                this.hollowBox.AddEvent( 'mouseup', function() {
+                    self.hollowBox.Attr({fill:offColor});
+                });
+                this.hollowBox.AddEvent( 'mouseover', function() {
+                    self.hollowBox.Attr({ stroke:onColor, strokeWidth:"2px" });
+                });
+                this.hollowBox.AddEvent( 'mouseout', function() {
+                    self.hollowBox.Attr({ stroke:offColor, strokeWidth:"2px" });
+                });
+            },
+            
+            NeedsToClear: function() {
+                return this.clearFlag;
+            },
+            Reset: function() {
+                this.clearFlag = false;
+            }
+        };
+
+    }
+
     // TriggerLine Class
     {
         // ------------------------------------------------------------------
@@ -130,7 +203,6 @@ dlat.timing = function() {
                                                          TRIGGERLINE_BGCOLOR);
             this.triggerBoxes = [];
             this.SetupTriggerBoxes();
-
         };
         
         mod.TriggerLine.prototype = {
@@ -144,6 +216,12 @@ dlat.timing = function() {
                     var bb = templateBox.MoveRight(dx);
                     var tb = new mod.TriggerBox(bb);                    
                     this.triggerBoxes.push(tb);
+                }
+            },
+
+            Clear: function() {
+                for (var i=0; i<NUM_TRIGGER_BOXES; i++) {
+                    this.triggerBoxes[i].Clear();
                 }
             },
             
@@ -197,7 +275,6 @@ dlat.timing = function() {
 
             var padding = 3; // visual space
             var roomForName = 60; // make room for the name
-
             
             var innerBox = bb.
                     Shrink(padding).
@@ -208,7 +285,7 @@ dlat.timing = function() {
             this.innerBox = innerBox.
                 MoveDown(TRIGGERLINE_HEIGHT).
                 SetHeight(innerBox.Height() - TRIGGERLINE_HEIGHT);
-            
+
             this.background = new box.BackgroundBox(bb, "#EEE");
             this.innerBackground = new box.BackgroundBox(this.innerBox, "#DDD");
 
@@ -225,14 +302,19 @@ dlat.timing = function() {
             // occupies the entire width of the inner box and some
             // small height of it.
             this.triggerLine = new mod.TriggerLine(innerBox);
-
+            this.triggerLineClear = new mod.TriggerLineClear(innerBox);
+            // 
+            
             // experiment
             // var c = snap.image("gifs/indicator.gif", 400, 400, 288, 224);
         };
         
         mod.Waveform.prototype = {
             Update: function(t) {
-                //log("updating waveform: " + this.name + ", time: " + t);
+                if (this.triggerLineClear.NeedsToClear()) {
+                    this.triggerLine.Clear();
+                    this.triggerLineClear.Reset();
+                }                
             },
             
             ShiftLeft: function() {
@@ -247,7 +329,7 @@ dlat.timing = function() {
             // which part of the canvas is occupied
             BoundingBox() {
                 return this.bb;
-            },
+            }
         };
     }
 
@@ -379,9 +461,9 @@ dlat.timing = function() {
             // waveforms need to shift right T nano seconds. Keep the sweep
             // bar in the middle of the scroll region, so the important
             // bits are always at the center.
-            Update: function(curTime) {
+            Update: function() {
                 this.waveforms.forEach(function(wf) {
-                    wf.Update(curTime);
+                    wf.Update();
                 });
             },
 

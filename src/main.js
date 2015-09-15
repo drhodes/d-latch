@@ -21,6 +21,15 @@ function main() {
     diag.AddWaveform("D", "10H:2X:10L");
     
     diag.Update(1);
+
+    // :/ this doesn't seem like the way to do this.
+    function updateFrame() {
+        setTimeout( function() {
+            diag.Update();
+            updateFrame();
+        }, 1000/10);
+    }
+    updateFrame();   
 }
 
 main();

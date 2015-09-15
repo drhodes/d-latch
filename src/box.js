@@ -31,6 +31,11 @@ dlat.box = function() {
             return new mod.BoundingBox( this.top+n, this.left+n,
                                          this.width-2*n, this.height-2*n);
         },
+        MoveLeft: function(dx) {
+            var bb = this.Clone();
+            bb.left -= dx;
+            return bb;
+        },
         MoveRight: function(dx) {
             var bb = this.Clone();
             bb.left += dx;
