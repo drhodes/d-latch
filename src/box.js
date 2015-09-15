@@ -8,9 +8,9 @@ dlat.box = function() {
     // -----------------------------------------------------------------------------
     // BoundingBox is for layout positioning and sizing.
     // screen coords, top, left is 0,0
-    mod.BoundingBox = function(top, left, width, height) {
-        this.top = top;
+    mod.BoundingBox = function(left, top, width, height) {
         this.left = left;
+        this.top = top;
         this.width = width;
         this.height = height;
     };
@@ -24,12 +24,12 @@ dlat.box = function() {
         Width: function() { return this.width; },
         Height: function() { return this.height; },
         Clone: function() {
-            return new mod.BoundingBox( this.top, this.left,
-                                         this.width, this.height);
+            return new mod.BoundingBox( this.left, this.top,
+                                        this.width, this.height);
         },
         Shrink: function(n) {
-            return new mod.BoundingBox( this.top+n, this.left+n,
-                                         this.width-2*n, this.height-2*n);
+            return new mod.BoundingBox( this.left+n,this.top+n, 
+                                        this.width-2*n, this.height-2*n);
         },
         MoveLeft: function(dx) {
             var bb = this.Clone();

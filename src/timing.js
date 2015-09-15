@@ -7,14 +7,16 @@ dlat.timing = function() {
     // imports
     var snap = dlat.common.snap;
     var box = dlat.box;
-    
+    var ui = dlat.ui;
+
+    // ------------------------------------------------------------------
     const WAVEFORM_HEIGHT = 80;
     const TRIGGERLINE_HEIGHT = 10;
-    const TRIGGERLINE_BGCOLOR = "#AAA";
-    const TRIGGERBOX_BGCOLOR = "#999";
+    const TRIGGERLINE_BGCOLOR = "#BBB";
+    const TRIGGERBOX_BGCOLOR = "#BBB";
     
     const NUM_TIME_STEPS = 100;    
-    const NS_PER_TRIGGER_BOX = 10;
+    //const NS_PER_TRIGGER_BOX = 10;
     
     // class TriggerBox
     {
@@ -23,7 +25,7 @@ dlat.timing = function() {
         // a specific time in nano seconds offset from zero.  If the
         // trigger box is checked then the input is toggled
         
-        // constructor
+        // constructor.
         mod.TriggerBox = function(boundingBox) {
             this.activated = false;
             this.boundingBox = boundingBox;
@@ -34,6 +36,8 @@ dlat.timing = function() {
             this.setupIndicator();
             this.setupEventCallbacks();
         };
+
+        // methods.
         mod.TriggerBox.prototype = {
             setupIndicator: function() {
                 var bb = this.boundingBox;
@@ -43,10 +47,7 @@ dlat.timing = function() {
                 var r = bb.Right();
                 var m = (l+r)/2;
 
-                this.indicator = snap.polyline(l, t,
-                                               r, t,
-                                               m, b,
-                                               l, t);
+                this.indicator = snap.polyline(l, t, r, t, m, b, l, t);
                 this.indicator.attr({
                     fill: TRIGGERBOX_BGCOLOR,
                     stroke: TRIGGERBOX_BGCOLOR,
@@ -57,23 +58,24 @@ dlat.timing = function() {
                 this.indicator.mousedown(function() {
                     self.ToggleIndicator();
                 });
-            },
+            }
 
             // It may be necessary to lock out a range of trigger
             // boxes, this method locks one.
-            Lock: function() {
+            ,Lock: function() {
                 // remove the callbacks from this trigger box.
                 // change the colors.
-            },
+                // add the lock icon.
+            }
 
-            Clear: function() {
+            ,Clear: function() {
                 if (this.activated) {
                     this.ToggleIndicator();
                 }
-            },
+            }
             
-            ToggleIndicator: function() {
-                var onColor = "#1F1";
+            ,ToggleIndicator: function() {
+                var onColor = "#333";
                 var offColor = TRIGGERBOX_BGCOLOR;
                 this.activated = !this.activated;
                 
@@ -82,10 +84,15 @@ dlat.timing = function() {
                 } else {
                     this.indicator.attr({ fill: offColor });
                 }
-            },
+                dlat.GLOBAL_UPDATE();
+            }
+
+            ,Active: function() {
+                return this.activated;
+            }
             
             // +m
-            setupEventCallbacks: function() {
+            ,setupEventCallbacks: function() {
                 var self = this;
                 this.hollowBox.AddEvent( 'mousedown', function() {
                     self.ToggleIndicator();
@@ -102,10 +109,9 @@ dlat.timing = function() {
                 this.indicator.mouseout(function() {
                     self.GlowIndicator(false);
                 });
-            },
-
+            }
             
-            GlowIndicator: function(shouldGlow) {
+            , GlowIndicator: function(shouldGlow) {
                 var glowColor = "#FFF";
                 var noGlowColor = box.TRIGGERBOX_BGCOLOR;
                 if (shouldGlow) {
@@ -186,7 +192,6 @@ dlat.timing = function() {
                 this.clearFlag = false;
             }
         };
-
     }
 
     // class TriggerLine
@@ -216,41 +221,28 @@ dlat.timing = function() {
                     var tb = new mod.TriggerBox(bb);                    
                     this.triggerBoxes.push(tb);
                 }
-            },
+            }
 
-            Clear: function() {
+            ,Clear: function() {
                 for (var i=0; i<NUM_TIME_STEPS; i++) {
                     this.triggerBoxes[i].Clear();
                 }
-            },
+            }
             
-            Height: function() {
+            ,Height: function() {
                 this.boundingBox.Height();
-            },
+            }
             
-            BoundingBox: function() {
+            ,BoundingBox: function() {
                 return this.boundingBox.Clone();
             }
-        };
-    }
-    
-    // class SegmentUI
-    {
-        // ------------------------------------------------------------------
-        // A segment is a piece of the waveform that is associated with a
-        // time delta and two volt-time points
-        mod.SegmentUI = function() {
-            this.line = snap.line(0,0, 10,0); // arbitrary position
-            this.line.attr({
-                stroke: '#333',
-                strokeWidth: '1px'
-            });            
-        };
-        
-        mod.SegmentUI.prototype = {
-            MoveTo: function(x, y) {
-                m = new Snap.Matrix().translate(x, y);
-                this.line.transform(m);
+            
+            ,GetTogglePoints: function() {
+                var ps = [];
+                this.triggerBoxes.forEach(function(tb) {
+                    ps.push(tb.Active());
+                });
+                return ps;
             }
         };
     }
@@ -267,13 +259,58 @@ dlat.timing = function() {
                 .Shrink(nudge);
             this.bgBox = new box.BackgroundBox(this.boundingBox, "#FFF");
             this.bgBox.Attr({ strokeWidth: "0px"});
+
+            this.segments = [];
+            this.setupSegments();
         };
         
         // methods
         mod.WavePlot.prototype = {
+            setupSegments: function() {
+                for (var i=0; i<NUM_TIME_STEPS; i++) {
+                    var segmentWidth = this.boundingBox.Width() / NUM_TIME_STEPS;
+                    var s = new ui.Segment();
+                    var x = i*segmentWidth + this.boundingBox.Left();
+                    var y = this.boundingBox.Top() + this.boundingBox.Height() / 2;
+                    s.MoveTo(x, y);
+                    this.segments.push(s);
+                }
+            }
+
+            ,Draw: function(togglePoints) {
+                if (togglePoints.length != NUM_TIME_STEPS) {
+                    throw "Fatal Inconsistency in WavePlot.Draw";
+                }
+
+                // this will change, but for now, the plot is binary.
+                // Plots start in the LO state.
+                curStateLow = true;
+                for (var i=0; i<NUM_TIME_STEPS; i++) {
+                    if (curStateLow) {
+                        this.SetSegmentVoltage(i, 0);
+                    } else {
+                        this.SetSegmentVoltage(i, 1);
+                    }
+                    if (togglePoints[i]) {
+                        curStateLow = !curStateLow;
+                    }
+                }
+            }
+            
+            ,SetSegmentVoltage: function(segIdx, v) {
+                // v = 0 corresponds to the bottom of the bounding box
+                // v = 1 corresponds to the top.  any value outside
+                // that range throws an exception.
+                if (v<0 || v>1) {
+                    throw "Voltage out of range in SetSegmentVoltage: " + v;
+                }
+                
+                dy = this.boundingBox.Height() * v;
+                this.segments[segIdx].MoveToY(this.boundingBox.Bottom() - dy);
+            }
+            
         };
     }
-
     
     // class Waveform
     {
@@ -304,7 +341,7 @@ dlat.timing = function() {
             this.innerBox = innerBox.
                 MoveDown(TRIGGERLINE_HEIGHT).
                 SetHeight(innerBox.Height() - TRIGGERLINE_HEIGHT);
-
+            
             this.background = new box.BackgroundBox(bb, "#EEE");
             this.innerBackground = new box.BackgroundBox(this.innerBox, "#DDD");
 
@@ -332,19 +369,27 @@ dlat.timing = function() {
         
         mod.Waveform.prototype = {
             Update: function(t) {
+                // consider moving triggerLineClear into triggerline.
                 if (this.triggerLineClear.NeedsToClear()) {
                     this.triggerLine.Clear();
                     this.triggerLineClear.Reset();
-                }                
+                }
+
+                this.drawWavePlot();
+            },
+
+            drawWavePlot: function() {
+                // there is a 1-to-1 correspondence between
+                // triggerBoxes and Segments. A TriggerBox will toggle
+                // the plot.
+                var tps = this.triggerLine.GetTogglePoints();
+                this.wavePlot.Draw(tps);
             },
             
             ShiftLeft: function() {
             },
 
             Zoom: function() {
-            },
-
-            parseSegments() {
             },
 
             // which part of the canvas is occupied
@@ -354,7 +399,7 @@ dlat.timing = function() {
         };
     }
 
-    // Waveform Parser
+    // class Waveform Parser
     {
         // Valid segment types, are:
         //  L for Low
@@ -464,7 +509,7 @@ dlat.timing = function() {
         };
     }
        
-    // Diagram Class
+    // class Diagram Class
     {
         // ------------------------------------------------------------------
         // Manage the waveforms, will need a time line and a scrubber.  Also
