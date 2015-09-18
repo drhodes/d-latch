@@ -41,13 +41,16 @@ dlat.timing = function() {
         mod.TriggerBox.prototype = {
             setupIndicator: function() {
                 var bb = this.boundingBox;
-                var t = bb.Top();
+                var t = bb.Top() + TRIGGERLINE_HEIGHT / 3;
                 var b = bb.Bottom();
                 var l = bb.Left();
                 var r = bb.Right();
                 var m = (l+r)/2;
 
-                this.indicator = snap.polyline(l, t, r, t, m, b, l, t);
+                this.indicator = snap.polyline(l, t,
+                                               r, t,
+                                               m, b,
+                                               l, t);
                 this.indicator.attr({
                     fill: TRIGGERBOX_BGCOLOR,
                     stroke: TRIGGERBOX_BGCOLOR,
@@ -111,7 +114,7 @@ dlat.timing = function() {
                 });
             }
             
-            , GlowIndicator: function(shouldGlow) {
+            ,GlowIndicator: function(shouldGlow) {
                 var glowColor = "#FFF";
                 var noGlowColor = box.TRIGGERBOX_BGCOLOR;
                 if (shouldGlow) {
@@ -183,12 +186,13 @@ dlat.timing = function() {
                 this.hollowBox.AddEvent( 'mouseout', function() {
                     self.hollowBox.Attr({ stroke:offColor, strokeWidth:"2px" });
                 });
-            },
+            }
             
-            NeedsToClear: function() {
+            ,NeedsToClear: function() {
                 return this.clearFlag;
-            },
-            Reset: function() {
+            }
+            
+            ,Reset: function() {
                 this.clearFlag = false;
             }
         };
@@ -199,6 +203,14 @@ dlat.timing = function() {
         // ------------------------------------------------------------------
         // This is the bar on top of the wave form that lets users
         // sequence a toggle on a particular input.
+        
+        // api        
+        // BoundingBox
+        // Clear      
+        // GetTogglePoints
+        // Height
+        // SetupTriggerBoxes
+        
         // constructor
         mod.TriggerLine = function(boundingBox) {
             this.height = TRIGGERLINE_HEIGHT;
@@ -206,11 +218,11 @@ dlat.timing = function() {
             this.backgroundBox = new box.BackgroundBox( this.boundingBox,
                                                          TRIGGERLINE_BGCOLOR);
             this.triggerBoxes = [];
-            this.SetupTriggerBoxes();
+            this.setupTriggerBoxes();
         };
         
         mod.TriggerLine.prototype = {
-            SetupTriggerBoxes: function() {
+            setupTriggerBoxes: function() {
                 // split the bounding box into a number of bounding boxes,
                 var widthPerBox = this.boundingBox.Width() / NUM_TIME_STEPS;
                 var templateBox = this.boundingBox.SetWidth(widthPerBox);
@@ -271,7 +283,8 @@ dlat.timing = function() {
                     var segmentWidth = this.boundingBox.Width() / NUM_TIME_STEPS;
                     var s = new ui.Segment();
                     var x = i*segmentWidth + this.boundingBox.Left();
-                    var y = this.boundingBox.Top() + this.boundingBox.Height() / 2;
+                    var y = this.boundingBox.Bottom();
+                    
                     s.MoveTo(x, y);
                     this.segments.push(s);
                 }

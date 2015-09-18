@@ -1,8 +1,4 @@
 
-// coding conventions.
-// lowercase method names and data members are private.
-// imports are always qualified
-
 function main() {
     dlat.common.initSnap();
 
@@ -27,7 +23,7 @@ function main() {
     // function is visible to all code, it updates the entire UI once.
 
     // Update functions MUST NOT contain a call to this function. That
-    // would induce ill defined recursion and malaise.
+    // would induce ill defined recursion and general malaise.
     dlat.GLOBAL_UPDATE = function() {
         diag.Update();
     };

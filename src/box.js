@@ -8,6 +8,7 @@ dlat.box = function() {
     // -----------------------------------------------------------------------------
     // BoundingBox is for layout positioning and sizing.
     // screen coords, top, left is 0,0
+    // functional object, all methods allocate a new bounding box.
     mod.BoundingBox = function(left, top, width, height) {
         this.left = left;
         this.top = top;
