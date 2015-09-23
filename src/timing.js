@@ -10,10 +10,13 @@ dlat.timing = function() {
     var ui = dlat.ui;
 
     // ------------------------------------------------------------------
-    const WAVEFORM_HEIGHT = 80;
-    const TRIGGERLINE_HEIGHT = 10;
+    const WAVEFORM_HEIGHT = 70;
+    const TRIGGERLINE_HEIGHT = 8;
     const TRIGGERLINE_BGCOLOR = "#BBB";
     const TRIGGERBOX_BGCOLOR = "#BBB";
+
+    const WAVEFORM_BGCOLOR = "#EEE";
+    const WAVEFORM_LOCKED_BGCOLOR = "#DDD";
     
     const NUM_TIME_STEPS = 100;    
     //const NS_PER_TRIGGER_BOX = 10;
@@ -67,6 +70,10 @@ dlat.timing = function() {
             // boxes, this method locks one.
             ,Lock: function() {
                 // remove the callbacks from this trigger box.
+                this.hollowBox.RemoveEvents();
+                this.indicator.unmousemove();
+                this.indicator.unmouseout();
+                this.indicator.unmousedown();
                 // change the colors.
                 // add the lock icon.
             }
@@ -235,6 +242,12 @@ dlat.timing = function() {
                 }
             }
 
+            ,Lock: function() {
+                this.triggerBoxes.forEach(function(tb) {
+                    tb.Lock();
+                });
+            }
+            
             ,Clear: function() {
                 for (var i=0; i<NUM_TIME_STEPS; i++) {
                     this.triggerBoxes[i].Clear();
@@ -355,7 +368,7 @@ dlat.timing = function() {
                 MoveDown(TRIGGERLINE_HEIGHT).
                 SetHeight(innerBox.Height() - TRIGGERLINE_HEIGHT);
             
-            this.background = new box.BackgroundBox(bb, "#EEE");
+            this.background = new box.BackgroundBox(bb, WAVEFORM_BGCOLOR);
             this.innerBackground = new box.BackgroundBox(this.innerBox, "#DDD");
 
             this.wavePlot = new mod.WavePlot(this.innerBox);
@@ -375,6 +388,9 @@ dlat.timing = function() {
             this.triggerLine = new mod.TriggerLine(innerBox);
             this.triggerLineClear = new mod.TriggerLineClear(innerBox);
             // 
+
+            // now, add some padding at the bottom.
+            this.bb = this.bb.SetHeight(this.bb.Height() + 10);
             
             // experiment
             // var c = snap.image("gifs/indicator.gif", 400, 400, 288, 224);
@@ -389,24 +405,29 @@ dlat.timing = function() {
                 }
 
                 this.drawWavePlot();
-            },
-
-            drawWavePlot: function() {
+            }
+            , Lock: function() {
+                // add a lock icon where the x is
+                // unset the callbacks for children widgets.
+                this.triggerLine.Lock();
+                //this.triggerLineClear.Lock();
+            }
+            , drawWavePlot: function() {
                 // there is a 1-to-1 correspondence between
                 // triggerBoxes and Segments. A TriggerBox will toggle
                 // the plot.
                 var tps = this.triggerLine.GetTogglePoints();
                 this.wavePlot.Draw(tps);
-            },
+            }
             
-            ShiftLeft: function() {
-            },
+            , ShiftLeft: function() {
+            }
 
-            Zoom: function() {
-            },
+            , Zoom: function() {
+            }
 
             // which part of the canvas is occupied
-            BoundingBox() {
+            , BoundingBox() {
                 return this.bb;
             }
         };
@@ -544,13 +565,13 @@ dlat.timing = function() {
                 this.waveforms.forEach(function(wf) {
                     wf.Update();
                 });
-            },
+            }
 
             // Add a waveform to the diagram.  name the waveform and pass in the
             // data.  the data, what is it?  It looks like this:
             // "5L:4X:3H", which represents 5 ns worth of low voltage,
             // rising edge for 4 ns, and 3 nanoseconds worth of high.
-            AddWaveform: function(name, data) {
+            , AddWaveform: function(name, data) {
                 var wfbb = this.boundingBox.
                         Clone().
                         SetHeight(WAVEFORM_HEIGHT).
@@ -566,23 +587,24 @@ dlat.timing = function() {
                         "The Diagram object needs a bigger BoundingBox to start with.";
                     // can't justify building a layout framework for this yet. :)
                 }
-            },
+                return waveform;
+            }
             
-            heightOfAllWaveforms: function() {
+            , heightOfAllWaveforms: function() {
                 var totalHeight = 0;
                 this.waveforms.forEach(function(wf) {
                     totalHeight += wf.BoundingBox().Height();
                 });
                 return totalHeight;
-            },
+            }
             
-            RoomForWaveform: function(waveform) {
+            , RoomForWaveform: function(waveform) {
                 var dh = waveform.BoundingBox().Height();
                 return this.heightOfAllWaveforms() + dh < this.boundingBox.Height();
-            },
+            }
             
             // zoom all the waveforms in time.
-            Zoom: function() {
+            , Zoom: function() {
             }
         };
     }

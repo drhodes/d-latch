@@ -1,3 +1,5 @@
+// might not need this code.
+// which would be really good if it can be disposed of.
 
 dlat.TruthTable = function(name, labels, result) {
     this.name = name;
@@ -5,6 +7,11 @@ dlat.TruthTable = function(name, labels, result) {
     this.result = result;
     this.Setup();
 };
+
+// dlat.TruthTableCons = function(cols, resultCol) {
+//     ['G',1,1,'x', 'x', 0, 0]
+// }
+
 
 dlat.TruthTable.prototype = {
     // for instance TruthTable("AND", ['A', 'B'], [0, 0, 0, 1])

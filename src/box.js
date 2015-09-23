@@ -85,18 +85,24 @@ dlat.box = function() {
     mod.HollowBox.prototype = {
         AddEvent: function(event, f) {
             this.rect[event](f);
-        },
+        }
 
-        Foo: function() {
+        ,RemoveEvents: function() {
+            this.rect.unmousedown();
+            this.rect.unmousemove();
+            this.rect.unmouseout();
+        }
+        
+        ,Foo: function() {
             log("Foo was called on HollowBox");
-        },
+        }
 
-        Attr: function(attr) {
+        ,Attr: function(attr) {
             this.rect.attr(attr);
         }
     };
 
-
+    // TODO combine these two ui boxes.
     // -----------------------------------------------------------------------------
     // BackgroundBox is a colored box
 
